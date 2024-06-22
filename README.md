@@ -1,6 +1,8 @@
-# Realtime User Status Change
+# Realtime User Status Change (Node)
 
 ![alt text](docs/preview.png)
+
+This is the NodeJS implementation of my Hono + tRPC + Bun example: https://github.com/Blankeos/realtime-user-status
 
 **Feature Demonstrations**
 
@@ -13,12 +15,13 @@
 
 - Hono
 - tRPC (subscriptions)
-- Bun (websockets)
+- ws (websockets)
+- Node
 
-**Used**
+**Small thing I added**
 
-- Hono and Bun Websocket Upgrading to 101 Switching Protocol: https://hono.dev/docs/helpers/websocket
-- Bun Websocket Handling the tRPC router: https://github.com/cah4a/trpc-bun-adapter
+- Running actual JS using `node` only. Not `tsx` or `ts-node` (Less memory overhead).
+- Did this by building properly with `tsc` and `tsc-alias` (automatically fixes `@/*` and no `.js` imports).
 
 ---
 

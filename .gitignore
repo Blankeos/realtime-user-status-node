@@ -31,3 +31,9 @@ dist-ssr
 # database
 local.db
 local.db-journal
+
+# Server compilation
+/dist-server
+vite.config.js
+vite.config.d.ts
+tsconfig.node.tsbuildinfo

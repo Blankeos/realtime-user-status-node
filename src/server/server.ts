@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { renderPage } from 'vike/server';
 import { appRouter } from './_app';
 import { createContext } from './context';
+import { attachWebsocketHandler } from './websocket';
 
 const app = new Hono();
 
@@ -72,15 +73,19 @@ app.onError((_, c) => {
   );
 });
 
-const server = serve(
-  {
-    fetch: app.fetch,
-    port: privateConfig.PORT,
-  },
-  (info) => {
-    console.log('Server running at', info.port);
-  }
-);
+if (privateConfig.NODE_ENV === 'production') {
+  const server = serve(
+    {
+      fetch: app.fetch,
+      port: privateConfig.PORT,
+    },
+    (info) => {
+      console.log('Server running at', info.port);
+    }
+  );
+
+  attachWebsocketHandler(server);
+}
 
 export default {
   fetch: app.fetch,
