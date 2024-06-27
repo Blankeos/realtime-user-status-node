@@ -2,19 +2,21 @@
 // How to serve Vike (SSR middleware) via a Hono server.
 // https://github.com/phonzammi/vike-hono-example/blob/main/server/index.ts
 import { privateConfig } from '@/config.private';
-import { serve } from '@hono/node-server';
+import { HttpBindings, serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { trpcServer } from '@hono/trpc-server';
 import { Hono } from 'hono';
 import { renderPage } from 'vike/server';
+import { ViteDevServer } from 'vite';
 import { appRouter } from './_app';
 import { createContext } from './context';
 import { attachWebsocketHandler } from './websocket';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: HttpBindings }>();
 
 // Health checks
 app.get('/up', async (c) => {
+  // console.log(publicConfig.BASE_ORIGIN, 'carlo');
   return c.newResponse('🟢 UP', { status: 200 });
 });
 
@@ -29,15 +31,31 @@ app.use(
   })
 );
 
-// if (privateConfig.NODE_ENV === 'production') {
-// In prod, serve static files.
-app.use(
-  '/*',
-  serveStatic({
-    root: `./dist/client/`,
-  })
-);
-// }
+if (privateConfig.NODE_ENV === 'production') {
+  // In prod, serve static files.
+  app.use(
+    '/*',
+    serveStatic({
+      root: `./dist/client/`,
+    })
+  );
+} else {
+  let vite: ViteDevServer;
+  const { createServer } = await import('vite');
+  vite = await createServer({
+    server: { middlewareMode: true },
+    appType: 'custom',
+    base: '/',
+  });
+  app.use(async (c, next) => {
+    const viteDevMiddleware = () =>
+      new Promise<void>((resolve) => {
+        vite.middlewares(c.env.incoming, c.env.outgoing, () => resolve());
+      });
+    await viteDevMiddleware();
+    await next();
+  });
+}
 
 // For the Frontend + SSR
 app.get('*', async (c, next) => {
@@ -73,21 +91,21 @@ app.onError((_, c) => {
   );
 });
 
-if (privateConfig.NODE_ENV === 'production') {
-  const server = serve(
-    {
-      fetch: app.fetch,
-      port: privateConfig.PORT,
-    },
-    (info) => {
-      console.log('Server running at', info.port);
-    }
-  );
+// if (privateConfig.NODE_ENV === 'production') {
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: privateConfig.PORT,
+  },
+  (info) => {
+    console.log('Server running at', info.port);
+  }
+);
 
-  attachWebsocketHandler(server);
-}
+attachWebsocketHandler(server);
+// }
 
-export default {
-  fetch: app.fetch,
-  port: privateConfig.PORT,
-};
+// export default {
+//   fetch: app.fetch,
+//   port: privateConfig.PORT,
+// };
