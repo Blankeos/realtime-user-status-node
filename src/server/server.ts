@@ -6,10 +6,12 @@ import { HttpBindings, serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { trpcServer } from '@hono/trpc-server';
 import { Hono } from 'hono';
+import { createServer } from 'http';
 import { renderPage } from 'vike/server';
 import { ViteDevServer } from 'vite';
 import { appRouter } from './_app';
 import { createContext } from './context';
+import { generateTLS } from './utils/generateTLS';
 import { attachWebsocketHandler } from './websocket';
 
 const app = new Hono<{ Bindings: HttpBindings }>();
@@ -91,11 +93,17 @@ app.onError((_, c) => {
   );
 });
 
-// if (privateConfig.NODE_ENV === 'production') {
+const tls = generateTLS();
+
 const server = serve(
   {
     fetch: app.fetch,
     port: privateConfig.PORT,
+    createServer: createServer,
+    // serverOptions: {
+    //   cert: tls.cert,
+    //   key: tls.key,
+    // },
   },
   (info) => {
     console.log('Server running at', info.port);

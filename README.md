@@ -4,12 +4,19 @@
 
 This is the NodeJS implementation of my Hono + tRPC + Bun example: https://github.com/Blankeos/realtime-user-status
 
+Motivation for this: https://github.com/honojs/vite-plugins/issues/140.
+
+- Websockets + HMR doesn't work on @hono/vite-dev-server.
+- HMR using custom `Vite.createServer` + `vite.middlewares` works, but removes backend change watch.
+
 **Feature Demonstrations**
 
 - [x] Auth
 - [x] Image change
 - [x] Last Status Updated with Timer
-- [x] Realtime pubsub with websockets (currently broken in dev, works in prod: https://github.com/honojs/vite-plugins/issues/140)
+- [x] Realtime pubsub with websockets
+- [x] HMR using a custom `vite.middlewares` + `connectToWeb`.
+- [x] Backend change Watch with Nodemon (caveat, whenever you change, frontend dies, but connects again)
 
 **Notable Stack**
 

@@ -16,7 +16,6 @@ const getDialect = () => {
 
   // Because better-sqlite3 is weird.
   const cleanUrl = privateConfig.database.URL.replace('file:', '');
-  console.log('Clean URL', cleanUrl);
 
   if (isLocal) {
     return new SqliteDialect({
