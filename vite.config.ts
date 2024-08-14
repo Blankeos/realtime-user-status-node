@@ -43,6 +43,10 @@ export default defineConfig({
     hmr: {
       port: 3002,
     },
+    watch: {
+      // So it doesn't send `type: full-reload` message on HMR socket when server files change.
+      ignored: ['**/src/server/**'],
+    },
   },
   preview: {
     port: 3000,
